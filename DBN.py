@@ -62,7 +62,7 @@ class DBN(object):
 
         # allocate symbolic variables for the data
         self.x = T.matrix('x')  # the data is presented as rasterized images
-        self.y = T.ivector('y')  # the labels are presented as 1D vector
+        self.y = T.matrix('y', dtype='int32')  # the labels are presented as 1D vector
                                  # of [int] labels
         # end-snippet-1
         # The DBN is an MLP, for which all weights of intermediate
@@ -122,6 +122,7 @@ class DBN(object):
 
         # We now need to add a logistic layer on top of the MLP
         self.logLayer = LogisticRegression(
+            rng=numpy_rng,
             input=self.sigmoid_layers[-1].output,
             n_in=hidden_layers_sizes[-1],
             n_out=n_outs)
@@ -265,6 +266,15 @@ class DBN(object):
             }
         )
 
+        predict_score = theano.function(
+            [],
+            [self.errors, self.logLayer.predict()],
+            givens={
+                self.x: test_set_x,
+                self.y: test_set_y
+            }
+        )
+
         # Create a function that scans the entire validation set
         def valid_score():
             return [valid_score_i(i) for i in xrange(n_valid_batches)]
@@ -273,10 +283,10 @@ class DBN(object):
         def test_score():
             return [test_score_i(i) for i in xrange(n_test_batches)]
 
-        return train_fn, valid_score, test_score
+        return train_fn, valid_score, test_score, predict_score
 
 
-def test_DBN(datasets, finetune_lr=0.1, pretraining_epochs=100,
+def test_DBN(datasets, n_ins, n_outs, finetune_lr=0.1, pretraining_epochs=100,
              pretrain_lr=0.01, k=1, training_epochs=1000,
              batch_size=10):
     """
@@ -311,9 +321,9 @@ def test_DBN(datasets, finetune_lr=0.1, pretraining_epochs=100,
     numpy_rng = numpy.random.RandomState(123)
     print '... building the model'
     # construct the Deep Belief Network
-    dbn = DBN(numpy_rng=numpy_rng, n_ins=32 * 32,
+    dbn = DBN(numpy_rng=numpy_rng, n_ins=n_ins,
               hidden_layers_sizes=[1000, 1000, 1000],
-              n_outs=2)
+              n_outs=n_outs)
 
     # start-snippet-2
     #########################
@@ -349,7 +359,7 @@ def test_DBN(datasets, finetune_lr=0.1, pretraining_epochs=100,
 
     # get the training, validation and testing function for the model
     print '... getting the finetuning functions'
-    train_fn, validate_model, test_model = dbn.build_finetune_functions(
+    train_fn, validate_model, test_model, predict_model = dbn.build_finetune_functions(
         datasets=datasets,
         batch_size=batch_size,
         learning_rate=finetune_lr
@@ -434,6 +444,8 @@ def test_DBN(datasets, finetune_lr=0.1, pretraining_epochs=100,
                           os.path.split(__file__)[1] +
                           ' ran for %.2fm' % ((end_time - start_time)
                                               / 60.))
+
+    return predict_model()
 
 
 if __name__ == '__main__':

@@ -55,7 +55,7 @@ class LogisticRegression(object):
     determine a class membership probability.
     """
 
-    def __init__(self, input, n_in, n_out):
+    def __init__(self, rng, input, n_in, n_out):
         """ Initialize the parameters of the logistic regression
 
         :type input: theano.tensor.TensorType
@@ -74,8 +74,16 @@ class LogisticRegression(object):
         # start-snippet-1
         # initialize with 0 the weights W as a matrix of shape (n_in, n_out)
         self.W = theano.shared(
-            value=numpy.zeros(
-                (n_in, n_out),
+            # value=numpy.zeros(
+            #     (n_in, n_out),
+            #     dtype=theano.config.floatX
+            # ),
+            value=numpy.asarray(
+                rng.uniform(
+                    low=-0.5,
+                    high=0.5,
+                    size=(n_in, n_out)
+                ),
                 dtype=theano.config.floatX
             ),
             name='W',
@@ -83,8 +91,16 @@ class LogisticRegression(object):
         )
         # initialize the baises b as a vector of n_out 0s
         self.b = theano.shared(
-            value=numpy.zeros(
-                (n_out,),
+            # value=numpy.zeros(
+            #     (n_out,),
+            #     dtype=theano.config.floatX
+            # ),
+            value=numpy.asarray(
+                rng.uniform(
+                    low=-0.5,
+                    high=0.5,
+                    size=(n_out,)
+                ),
                 dtype=theano.config.floatX
             ),
             name='b',
@@ -99,12 +115,18 @@ class LogisticRegression(object):
         # x is a matrix where row-j  represents input training sample-j
         # b is a vector where element-k represent the free parameter of hyper
         # plain-k
-        self.p_y_given_x = T.nnet.softmax(T.dot(input, self.W) + self.b)
+        # self.p_y_given_x = T.nnet.softmax(T.dot(input, self.W) + self.b)
+
+        # use sigmoid instead of softmax
+        self.p_y_given_x = T.nnet.sigmoid(T.dot(input, self.W) + self.b)
 
         # symbolic description of how to compute prediction as class whose
         # probability is maximal
-        self.y_pred = T.argmax(self.p_y_given_x, axis=1)
+        # self.y_pred = T.argmax(self.p_y_given_x, axis=1)
         # end-snippet-1
+
+        # round to 0 or 1 from probability
+        self.y_pred = T.cast(T.round(self.p_y_given_x), 'int32')
 
         # parameters of the model
         self.params = [self.W, self.b]
@@ -138,8 +160,12 @@ class LogisticRegression(object):
         # LP[n-1,y[n-1]]] and T.mean(LP[T.arange(y.shape[0]),y]) is
         # the mean (across minibatch examples) of the elements in v,
         # i.e., the mean log-likelihood across the minibatch.
-        return -T.mean(T.log(self.p_y_given_x)[T.arange(y.shape[0]), y])
+        # return -T.mean(T.log(self.p_y_given_x)[T.arange(y.shape[0]), y])
         # end-snippet-2
+
+        # diff between probability and actual result
+        # return -T.mean(T.log(T.abs_(self.p_y_given_x - y)))
+        return T.mean(T.abs_(self.p_y_given_x - y))
 
     def errors(self, y):
         """Return a float representing the number of errors in the minibatch
@@ -164,6 +190,9 @@ class LogisticRegression(object):
             return T.mean(T.neq(self.y_pred, y))
         else:
             raise NotImplementedError()
+
+    def predict(self):
+        return self.y_pred
 
 
 def load_data(dataset):

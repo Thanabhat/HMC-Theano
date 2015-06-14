@@ -158,6 +158,7 @@ class MLP(object):
         # The logistic regression layer gets as input the hidden units
         # of the hidden layer
         self.logRegressionLayer = LogisticRegression(
+            rng=rng,
             input=self.hiddenLayer.output,
             n_in=n_hidden,
             n_out=n_out
@@ -191,6 +192,7 @@ class MLP(object):
         self.params = self.hiddenLayer.params + self.logRegressionLayer.params
         # end-snippet-3
 
+        self.predict = self.logRegressionLayer.predict
 
 def test_mlp(datasets, n_in, n_out, learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=100,
              batch_size=1, n_hidden=500):
@@ -238,7 +240,7 @@ def test_mlp(datasets, n_in, n_out, learning_rate=0.01, L1_reg=0.00, L2_reg=0.00
     # allocate symbolic variables for the data
     index = T.lscalar()  # index to a [mini]batch
     x = T.matrix('x')  # the data is presented as rasterized images
-    y = T.ivector('y')  # the labels are presented as 1D vector of
+    y = T.matrix('y', dtype='int32')  # the labels are presented as 1D vector of
                         # [int] labels
 
     rng = numpy.random.RandomState(1234)
@@ -396,6 +398,17 @@ def test_mlp(datasets, n_in, n_out, learning_rate=0.01, L1_reg=0.00, L2_reg=0.00
     print >> sys.stderr, ('The code for file ' +
                           os.path.split(__file__)[1] +
                           ' ran for %.2fm' % ((end_time - start_time) / 60.))
+
+
+    predict_model = theano.function(
+        inputs=[],
+        outputs=[classifier.errors(y),classifier.predict()],
+        givens={
+            x: test_set_x,
+            y: test_set_y
+        }
+    )
+    return predict_model()
 
 
 if __name__ == '__main__':
