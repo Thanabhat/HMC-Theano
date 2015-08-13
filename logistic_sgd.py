@@ -80,8 +80,8 @@ class LogisticRegression(object):
             # ),
             value=numpy.asarray(
                 rng.uniform(
-                    low=-0.5,
-                    high=0.5,
+                    low=-numpy.sqrt(6. / (n_in + n_out)),
+                    high=numpy.sqrt(6. / (n_in + n_out)),
                     size=(n_in, n_out)
                 ),
                 dtype=theano.config.floatX
@@ -97,8 +97,8 @@ class LogisticRegression(object):
             # ),
             value=numpy.asarray(
                 rng.uniform(
-                    low=-0.5,
-                    high=0.5,
+                    low=-numpy.sqrt(6. / (n_in + n_out)),
+                    high=numpy.sqrt(6. / (n_in + n_out)),
                     size=(n_out,)
                 ),
                 dtype=theano.config.floatX
@@ -167,6 +167,7 @@ class LogisticRegression(object):
         # return -T.mean(T.log(T.abs_(self.p_y_given_x - y)))
         # return T.mean(T.abs_(self.p_y_given_x - y))
         return -T.mean(T.log(1-T.abs_(self.p_y_given_x - y)))
+        # return T.mean(T.square(self.p_y_given_x - y))
 
     def errors(self, y):
         """Return a float representing the number of errors in the minibatch
@@ -193,7 +194,7 @@ class LogisticRegression(object):
             raise NotImplementedError()
 
     def predict(self):
-        return self.y_pred
+        return self.p_y_given_x
 
 
 def load_data(dataset):

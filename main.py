@@ -28,13 +28,13 @@ def readJOHMCFF(filePath):
                     pass
             data_y.append(data_y_tmp)
         f.close()
-    return (data_x, data_y), classList
+    return (data_x, data_y), classList, attrSize, classSize
 
 
 def load_data(dataset):
-    train_set, classList = readJOHMCFF("datasets_FUN/" + dataset + "/" + dataset + ".train.johmcff")
-    valid_set, _ = readJOHMCFF("datasets_FUN/" + dataset + "/" + dataset + ".valid.johmcff")
-    test_set, _ = readJOHMCFF("datasets_FUN/" + dataset + "/" + dataset + ".test.johmcff")
+    train_set, classList, attrSize, classSize = readJOHMCFF("datasets_FUN/" + dataset + "/" + dataset + ".train.johmcff")
+    valid_set, _, _, _ = readJOHMCFF("datasets_FUN/" + dataset + "/" + dataset + ".valid.johmcff")
+    test_set, _, _, _ = readJOHMCFF("datasets_FUN/" + dataset + "/" + dataset + ".test.johmcff")
 
 
     def shared_dataset(data_xy, borrow=True):
@@ -69,7 +69,7 @@ def load_data(dataset):
 
     rval = [(train_set_x, train_set_y), (valid_set_x, valid_set_y),
             (test_set_x, test_set_y)]
-    return rval, classList
+    return rval, classList, attrSize, classSize
 
 def save_prediction(dataset, predict, classList):
     with open("datasets_FUN/" + dataset + "/" + dataset + ".test.pred.johmcff", "w") as f:
@@ -85,9 +85,9 @@ def save_prediction(dataset, predict, classList):
         f.close()
 
 
-datasetName = "church_FUN"
-datasets, classList = load_data(datasetName)
-# error, predict = test_mlp(datasets = datasets, n_in=31, n_out=499, batch_size=20, n_epochs=100)
-error, predict = test_DBN(datasets=datasets, n_ins=31, n_outs=499, pretraining_epochs=30, training_epochs=100, batch_size=20)
+datasetName = "eisen_FUN"
+datasets, classList, attrSize, classSize = load_data(datasetName)
+# error, predict = test_mlp(datasets = datasets, n_in=attrSize, n_out=classSize, n_hidden=200, batch_size=20, n_epochs=200)
+error, predict = test_DBN(datasets=datasets, n_ins=attrSize, n_outs=classSize, pretraining_epochs=100, pretrain_lr=0.02, training_epochs=300, finetune_lr=0.1, batch_size=20)
 save_prediction(datasetName, predict, classList)
 pass
