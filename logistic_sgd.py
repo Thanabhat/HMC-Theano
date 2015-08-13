@@ -165,7 +165,8 @@ class LogisticRegression(object):
 
         # diff between probability and actual result
         # return -T.mean(T.log(T.abs_(self.p_y_given_x - y)))
-        return T.mean(T.abs_(self.p_y_given_x - y))
+        # return T.mean(T.abs_(self.p_y_given_x - y))
+        return -T.mean(T.log(1-T.abs_(self.p_y_given_x - y)))
 
     def errors(self, y):
         """Return a float representing the number of errors in the minibatch
