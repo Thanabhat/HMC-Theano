@@ -228,7 +228,7 @@ class DBN(object):
 
         train_fn = theano.function(
             inputs=[index],
-            outputs=self.finetune_cost,
+            outputs=[self.finetune_cost, self.errors],
             updates=updates,
             givens={
                 self.x: train_set_x[
@@ -322,9 +322,9 @@ def test_DBN(datasets, n_ins, n_outs, finetune_lr=0.1, pretraining_epochs=100,
     print '... building the model'
     # construct the Deep Belief Network
     dbn = DBN(numpy_rng=numpy_rng, n_ins=n_ins,
-              hidden_layers_sizes=[1000, 1000, 1000],
+              # hidden_layers_sizes=[1000, 1000, 1000],
               # hidden_layers_sizes=[n_ins, n_ins, n_ins],
-              # hidden_layers_sizes=[500, 500, 500],
+              hidden_layers_sizes=[500, 500, 500],
               # hidden_layers_sizes=[200],
               n_outs=n_outs)
 
@@ -392,7 +392,7 @@ def test_DBN(datasets, n_ins, n_outs, finetune_lr=0.1, pretraining_epochs=100,
         epoch = epoch + 1
         for minibatch_index in xrange(n_train_batches):
 
-            minibatch_avg_cost = train_fn(minibatch_index)
+            minibatch_avg_cost, train_losses = train_fn(minibatch_index)
             iter = (epoch - 1) * n_train_batches + minibatch_index
 
             if (iter + 1) % validation_frequency == 0:
@@ -400,11 +400,12 @@ def test_DBN(datasets, n_ins, n_outs, finetune_lr=0.1, pretraining_epochs=100,
                 validation_losses = validate_model()
                 this_validation_loss = numpy.mean(validation_losses)
                 print(
-                    'epoch %i, minibatch %i/%i, validation error %f %%'
+                    'epoch %i, minibatch %i/%i, train error %f %%, validation error %f %%'
                     % (
                         epoch,
                         minibatch_index + 1,
                         n_train_batches,
+                        train_losses * 100,
                         this_validation_loss * 100.
                     )
                 )

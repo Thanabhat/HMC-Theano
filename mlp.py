@@ -307,7 +307,7 @@ def test_mlp(datasets, n_in, n_out, learning_rate=0.01, L1_reg=0.00, L2_reg=0.00
     # defined in `updates`
     train_model = theano.function(
         inputs=[index],
-        outputs=cost,
+        outputs=[cost, classifier.errors(y)],
         updates=updates,
         givens={
             x: train_set_x[index * batch_size: (index + 1) * batch_size],
@@ -345,7 +345,7 @@ def test_mlp(datasets, n_in, n_out, learning_rate=0.01, L1_reg=0.00, L2_reg=0.00
         epoch = epoch + 1
         for minibatch_index in xrange(n_train_batches):
 
-            minibatch_avg_cost = train_model(minibatch_index)
+            minibatch_avg_cost, train_losses = train_model(minibatch_index)
             # iteration number
             iter = (epoch - 1) * n_train_batches + minibatch_index
 
@@ -356,11 +356,12 @@ def test_mlp(datasets, n_in, n_out, learning_rate=0.01, L1_reg=0.00, L2_reg=0.00
                 this_validation_loss = numpy.mean(validation_losses)
 
                 print(
-                    'epoch %i, minibatch %i/%i, validation error %f %%' %
+                    'epoch %i, minibatch %i/%i, train error %f %%, validation error %f %%' %
                     (
                         epoch,
                         minibatch_index + 1,
                         n_train_batches,
+                        train_losses * 100,
                         this_validation_loss * 100.
                     )
                 )

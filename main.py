@@ -87,7 +87,7 @@ def save_prediction(dataset, predict, classList):
 
 datasetName = "eisen_FUN"
 datasets, classList, attrSize, classSize = load_data(datasetName)
-# error, predict = test_mlp(datasets = datasets, n_in=attrSize, n_out=classSize, n_hidden=200, batch_size=20, n_epochs=200)
-error, predict = test_DBN(datasets=datasets, n_ins=attrSize, n_outs=classSize, pretraining_epochs=100, pretrain_lr=0.02, training_epochs=300, finetune_lr=0.1, batch_size=20)
+# error, predict = test_mlp(datasets = datasets, n_in=attrSize, n_out=classSize, n_hidden=200, batch_size=20, n_epochs=500, learning_rate=0.003, L1_reg=0.00, L2_reg=0.000)
+error, predict = test_DBN(datasets=datasets, n_ins=attrSize, n_outs=classSize, pretraining_epochs=50, pretrain_lr=0.02, training_epochs=300, finetune_lr=0.03, batch_size=20)
 save_prediction(datasetName, predict, classList)
 pass
