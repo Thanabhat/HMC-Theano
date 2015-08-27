@@ -32,9 +32,9 @@ def readJOHMCFF(filePath):
 
 
 def load_data(dataset):
-    train_set, classList, attrSize, classSize = readJOHMCFF("datasets_FUN/" + dataset + "/" + dataset + ".train.johmcff")
-    valid_set, _, _, _ = readJOHMCFF("datasets_FUN/" + dataset + "/" + dataset + ".valid.johmcff")
-    test_set, _, _, _ = readJOHMCFF("datasets_FUN/" + dataset + "/" + dataset + ".test.johmcff")
+    train_set, classList, attrSize, classSize = readJOHMCFF("datasets/" + dataset + "/" + dataset + ".train.johmcff")
+    valid_set, _, _, _ = readJOHMCFF("datasets/" + dataset + "/" + dataset + ".valid.johmcff")
+    test_set, _, _, _ = readJOHMCFF("datasets/" + dataset + "/" + dataset + ".test.johmcff")
 
 
     def shared_dataset(data_xy, borrow=True):
@@ -72,7 +72,7 @@ def load_data(dataset):
     return rval, classList, attrSize, classSize
 
 def save_prediction(dataset, predict, classList):
-    with open("datasets_FUN/" + dataset + "/" + dataset + ".test.pred.johmcff", "w") as f:
+    with open("datasets/" + dataset + "/" + dataset + ".test.pred.johmcff", "w") as f:
         for i in range(0,len(classList)):
             f.write("@ATTRIBUTE Original-p-"+classList[i]+" numeric\n")
         f.write("\n@DATA\n")
@@ -85,9 +85,9 @@ def save_prediction(dataset, predict, classList):
         f.close()
 
 
-datasetName = "eisen_FUN"
+datasetName = "imclef07d"
 datasets, classList, attrSize, classSize = load_data(datasetName)
-# error, predict = test_mlp(datasets = datasets, n_in=attrSize, n_out=classSize, n_hidden=200, batch_size=20, n_epochs=500, learning_rate=0.003, L1_reg=0.00, L2_reg=0.000)
-error, predict = test_DBN(datasets=datasets, n_ins=attrSize, n_outs=classSize, pretraining_epochs=50, pretrain_lr=0.02, training_epochs=300, finetune_lr=0.03, batch_size=20)
+# error, predict = test_mlp(datasets = datasets, n_in=attrSize, n_out=classSize, n_hidden=500, batch_size=20, n_epochs=1000, learning_rate=0.005, L1_reg=0.000, L2_reg=0.000)
+error, predict = test_DBN(datasets=datasets, n_ins=attrSize, n_outs=classSize, pretraining_epochs=100, pretrain_lr=0.01, training_epochs=300, finetune_lr=0.002, batch_size=20)
 save_prediction(datasetName, predict, classList)
 pass

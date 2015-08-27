@@ -324,8 +324,11 @@ def test_DBN(datasets, n_ins, n_outs, finetune_lr=0.1, pretraining_epochs=100,
     dbn = DBN(numpy_rng=numpy_rng, n_ins=n_ins,
               # hidden_layers_sizes=[1000, 1000, 1000],
               # hidden_layers_sizes=[n_ins, n_ins, n_ins],
-              hidden_layers_sizes=[500, 500, 500],
-              # hidden_layers_sizes=[200],
+              # hidden_layers_sizes=[500, 500, 500],
+              # hidden_layers_sizes=[200, 200, 200],
+              hidden_layers_sizes=[60, 60, 60],
+              # hidden_layers_sizes=[100],
+              # hidden_layers_sizes=[20],
               n_outs=n_outs)
 
     # start-snippet-2
@@ -370,7 +373,7 @@ def test_DBN(datasets, n_ins, n_outs, finetune_lr=0.1, pretraining_epochs=100,
 
     print '... finetuning the model'
     # early-stopping parameters
-    patience = 4 * n_train_batches  # look as this many examples regardless
+    patience = 10 * n_train_batches  # look as this many examples regardless
     patience_increase = 2.    # wait this much longer when a new best is
                               # found
     improvement_threshold = 0.995  # a relative improvement of this much is
